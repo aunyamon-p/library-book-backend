@@ -5,11 +5,19 @@ dotenv.config();
 
 export const login = async (req, res) => {
   const { username, password } = req.body;
+    console.log("Login attempt:", username, password);
+
+     if (!username || !password) {
+    return res.status(400).json({ message: "Username and password required" });
+  }
+  
   try {
     const result = await pool.request()
       .input('username', username)
       .input('password', password)
       .query('SELECT * FROM Admin WHERE username = @username AND password = @password');
+
+    
 
     if (result.recordset.length === 0)
       return res.status(401).json({ message: 'Invalid credentials' });
