@@ -6,7 +6,6 @@ export const getReturnDetails = async (req, res) => {
   try {
     const result = await pool.request().query(`
       SELECT
-        dr.detail_returned_id,
         dr.return_id,
         dr.borrow_id,
         dr.book_id,
@@ -66,14 +65,17 @@ export const addReturnDetail = async (req, res) => {
 
 // PUT update return but recalc fine/status ใหม่เสมอ
 export const updateReturnDetail = async (req, res) => {
-  const { id } = req.params;
-  const { return_id, book_id, borrow_id, return_date, status, fine } = req.body;
+  const { id } = req.params; // return_id
+  const { book_id, borrow_id, return_date, status, fine } = req.body;
+
+  if (!book_id) {
+    return res.status(400).json({ error: 'book_id is required' });
+  }
 
   try {
 
     const result = await pool.request()
-      .input('id', id)
-      .input('return_id', return_id)
+      .input('return_id', id)
       .input('book_id', book_id)
       .input('borrow_id', borrow_id)
       .input('return_date', return_date)
@@ -81,15 +83,13 @@ export const updateReturnDetail = async (req, res) => {
       .input('fine', fine)
       .query(`
         UPDATE DetailReturned
-        SET return_id=@return_id, 
-            book_id=@book_id, 
-            borrow_id=@borrow_id,
+        SET borrow_id=@borrow_id,
             return_date=@return_date,
             status=@status,
             fine=@fine
-        WHERE detail_returned_id=@id;
+        WHERE return_id=@return_id AND book_id=@book_id;
 
-        SELECT * FROM DetailReturned WHERE detail_returned_id=@id
+        SELECT * FROM DetailReturned WHERE return_id=@return_id AND book_id=@book_id
       `);
 
     res.json(result.recordset[0]);
@@ -103,11 +103,17 @@ export const updateReturnDetail = async (req, res) => {
 
 // DELETE /return-details/:id
 export const deleteReturnDetail = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // return_id
+  const { book_id } = req.body;
+
+  if (!book_id) {
+    return res.status(400).json({ error: 'book_id is required' });
+  }
   try {
     const result = await pool.request()
-      .input('id', id)
-      .query('DELETE FROM DetailReturned WHERE detail_returned_id=@id');
+      .input('return_id', id)
+      .input('book_id', book_id)
+      .query('DELETE FROM DetailReturned WHERE return_id=@return_id AND book_id=@book_id');
 
     const affected = result.rowsAffected?.[0] || 0;
     if (affected === 0) {
