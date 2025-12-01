@@ -881,16 +881,21 @@
           "return_id": { "type": "integer" },
           "return_date": { "type": "string", "format": "date-time" },
           "totalfine": { "type": "number", "format": "float" },
-          "processed_id": { "type": "integer" }
+          "processed_by": { "type": "integer" }
         }
       },
       "ReturnInput": {
         "type": "object",
-        "required": ["return_date", "totalfine", "processed_id"],
+        "required": ["return_date", "processed_by"],
         "properties": {
           "return_date": { "type": "string", "format": "date-time" },
-          "totalfine": { "type": "number", "format": "float" },
-          "processed_id": { "type": "integer" }
+          "totalfine": { "type": "number", "format": "float", "description": "ถ้าใส่ items ระบบจะคำนวณจาก fine รวม" },
+          "processed_by": { "type": "integer" },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ReturnDetailInput" },
+            "description": "รายการหนังสือที่คืน"
+          }
         }
       },
       "ReturnDetail": {
@@ -898,17 +903,21 @@
         "properties": {
           "detail_returned_id": { "type": "integer" },
           "return_id": { "type": "integer" },
+          "borrow_id": { "type": "integer" },
           "book_id": { "type": "integer" },
+          "return_date": { "type": "string", "format": "date-time" },
           "fine": { "type": "number", "format": "float" },
           "status": { "type": "string" }
         }
       },
       "ReturnDetailInput": {
         "type": "object",
-        "required": ["return_id", "book_id", "fine", "status"],
+        "required": ["return_id", "borrow_id", "book_id", "return_date", "fine", "status"],
         "properties": {
           "return_id": { "type": "integer" },
+          "borrow_id": { "type": "integer" },
           "book_id": { "type": "integer" },
+          "return_date": { "type": "string", "format": "date-time" },
           "fine": { "type": "number", "format": "float" },
           "status": { "type": "string" }
         }
