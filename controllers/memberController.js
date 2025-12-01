@@ -1,0 +1,73 @@
+import pool from '../db/sqlServer.js';
+
+// GET /members
+export const getMembers = async (req, res) => {
+  try {
+    const result = await pool.request().query('SELECT * FROM Member');
+    res.json(result.recordset);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// POST /members
+export const addMember = async (req, res) => {
+  const { name, first_name, last_name, email, phone, borrowlimit, date_registered, status } = req.body;
+  try {
+    const result = await pool.request()
+      .input('name', name)
+      .input('first_name', first_name)
+      .input('last_name', last_name)
+      .input('email', email)
+      .input('phone', phone)
+      .input('borrowlimit', borrowlimit)
+      .input('date_registered', date_registered)
+      .input('status', status)
+      .query(`INSERT INTO Member (name, first_name, last_name, email, phone, borrowlimit, date_registered, status)
+              VALUES (@name,@first_name,@last_name,@email,@phone,@borrowlimit,@date_registered,@status);
+              SELECT * FROM Member WHERE user_id = SCOPE_IDENTITY()`);
+    res.json(result.recordset[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// PUT /members/:id
+export const updateMember = async (req, res) => {
+  const { id } = req.params;
+  const { name, first_name, last_name, email, phone, borrowlimit, date_registered, status } = req.body;
+  try {
+    const result = await pool.request()
+      .input('id', id)
+      .input('name', name)
+      .input('first_name', first_name)
+      .input('last_name', last_name)
+      .input('email', email)
+      .input('phone', phone)
+      .input('borrowlimit', borrowlimit)
+      .input('date_registered', date_registered)
+      .input('status', status)
+      .query(`UPDATE Member SET name=@name, first_name=@first_name, last_name=@last_name, email=@email,
+              phone=@phone, borrowlimit=@borrowlimit, date_registered=@date_registered, status=@status
+              WHERE user_id=@id;
+              SELECT * FROM Member WHERE user_id=@id`);
+    res.json(result.recordset[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// DELETE /members/:id
+export const deleteMember = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.request().input('id', id).query('DELETE FROM Member WHERE user_id=@id');
+    res.json({ message: 'Member deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
