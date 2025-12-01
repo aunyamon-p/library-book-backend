@@ -1,0 +1,598 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Library Book Backend API",
+    "version": "1.0.0",
+    "description": "API สำหรับระบบจัดการห้องสมุด (Admin, หนังสือ, สมาชิก, การยืม และสถิติ)"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Local server"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    { "name": "Auth" },
+    { "name": "Books" },
+    { "name": "Members" },
+    { "name": "Admins" },
+    { "name": "Borrow" },
+    { "name": "Dashboard" }
+  ],
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "เข้าสู่ระบบผู้ดูแล",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AuthLoginRequest" },
+              "example": { "username": "admin", "password": "password123" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "เข้าสู่ระบบสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthLoginResponse" }
+              }
+            }
+          },
+          "400": { "description": "ขาด username หรือ password" },
+          "401": { "description": "ข้อมูลเข้าสู่ระบบไม่ถูกต้อง" }
+        }
+      }
+    },
+    "/api/books": {
+      "get": {
+        "tags": ["Books"],
+        "summary": "รายการหนังสือทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Book" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Books"],
+        "summary": "เพิ่มหนังสือ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BookInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "เพิ่มหนังสือสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/books/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["Books"],
+        "summary": "แก้ไขข้อมูลหนังสือ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BookInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตหนังสือสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Books"],
+        "summary": "ลบหนังสือ",
+        "responses": {
+          "200": {
+            "description": "ลบหนังสือสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/members": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "รายการสมาชิกทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Member" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Members"],
+        "summary": "เพิ่มสมาชิก",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MemberInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "เพิ่มสมาชิกสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Member" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/members/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["Members"],
+        "summary": "แก้ไขข้อมูลสมาชิก",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MemberInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตสมาชิกสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Member" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Members"],
+        "summary": "ลบสมาชิก",
+        "responses": {
+          "200": {
+            "description": "ลบสมาชิกสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin": {
+      "get": {
+        "tags": ["Admins"],
+        "summary": "รายการผู้ดูแลทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Admin" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Admins"],
+        "summary": "เพิ่มผู้ดูแล",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "เพิ่มผู้ดูแลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Admin" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["Admins"],
+        "summary": "แก้ไขข้อมูลผู้ดูแล",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AdminInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตผู้ดูแลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Admin" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Admins"],
+        "summary": "ลบผู้ดูแล",
+        "responses": {
+          "200": {
+            "description": "ลบผู้ดูแลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/borrow": {
+      "get": {
+        "tags": ["Borrow"],
+        "summary": "ประวัติการยืมทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/BorrowRecord" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Borrow"],
+        "summary": "สร้างรายการยืม",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BorrowCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "สร้างรายการยืมสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BorrowCreateResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/borrow/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["Borrow"],
+        "summary": "อัปเดตสถานะหนังสือในรายการยืม",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BorrowStatusUpdateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตสถานะสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DetailBorrow" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Borrow"],
+        "summary": "ลบรายการยืม",
+        "responses": {
+          "200": {
+            "description": "ลบรายการยืมสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "สถิติแดชบอร์ด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/DashboardStats" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AuthLoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "type": "string" }
+        }
+      },
+      "AuthLoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" },
+          "user": { "$ref": "#/components/schemas/Admin" }
+        }
+      },
+      "MessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        }
+      },
+      "Admin": {
+        "type": "object",
+        "properties": {
+          "admin_id": { "type": "integer" },
+          "username": { "type": "string" },
+          "password": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      },
+      "AdminInput": {
+        "type": "object",
+        "required": ["username", "password", "first_name", "last_name", "name"],
+        "properties": {
+          "username": { "type": "string" },
+          "password": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      },
+      "Book": {
+        "type": "object",
+        "properties": {
+          "book_id": { "type": "integer" },
+          "isbn": { "type": "string" },
+          "book_name": { "type": "string" },
+          "author": { "type": "string" },
+          "publisher": { "type": "string" },
+          "publish_year": { "type": "integer" },
+          "shelf": { "type": "string" },
+          "amount": { "type": "integer" },
+          "status": { "type": "string", "description": "available | borrowed" },
+          "category_id": { "type": "integer" }
+        }
+      },
+      "BookInput": {
+        "type": "object",
+        "required": ["isbn", "book_name", "author", "publisher", "publish_year", "shelf", "amount", "status", "category_id"],
+        "properties": {
+          "isbn": { "type": "string" },
+          "book_name": { "type": "string" },
+          "author": { "type": "string" },
+          "publisher": { "type": "string" },
+          "publish_year": { "type": "integer" },
+          "shelf": { "type": "string" },
+          "amount": { "type": "integer" },
+          "status": { "type": "string", "description": "available | borrowed" },
+          "category_id": { "type": "integer" }
+        }
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "integer" },
+          "name": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "borrowlimit": { "type": "integer" },
+          "date_registered": { "type": "string", "format": "date-time" },
+          "status": { "type": "string" }
+        }
+      },
+      "MemberInput": {
+        "type": "object",
+        "required": ["name", "first_name", "last_name", "email", "phone", "borrowlimit", "date_registered", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "email": { "type": "string" },
+          "phone": { "type": "string" },
+          "borrowlimit": { "type": "integer" },
+          "date_registered": { "type": "string", "format": "date-time" },
+          "status": { "type": "string" }
+        }
+      },
+      "BorrowRecord": {
+        "type": "object",
+        "properties": {
+          "borrow_id": { "type": "integer" },
+          "member_name": { "type": "string" },
+          "book_name": { "type": "string" },
+          "borrow_date": { "type": "string", "format": "date-time" },
+          "due_date": { "type": "string", "format": "date-time" },
+          "status": { "type": "string" }
+        }
+      },
+      "BorrowCreateRequest": {
+        "type": "object",
+        "required": ["user_id", "borrow_date", "amount", "recorded_by", "books"],
+        "properties": {
+          "user_id": { "type": "integer" },
+          "borrow_date": { "type": "string", "format": "date-time" },
+          "amount": { "type": "integer" },
+          "recorded_by": { "type": "integer" },
+          "books": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["book_id", "due_date"],
+              "properties": {
+                "book_id": { "type": "integer" },
+                "due_date": { "type": "string", "format": "date-time" }
+              }
+            }
+          }
+        }
+      },
+      "BorrowCreateResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "borrow_id": { "type": "integer" }
+        }
+      },
+      "BorrowStatusUpdateRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "type": "string", "description": "borrowed | returned" }
+        }
+      },
+      "DetailBorrow": {
+        "type": "object",
+        "properties": {
+          "detail_borrow_id": { "type": "integer" },
+          "borrow_id": { "type": "integer" },
+          "book_id": { "type": "integer" },
+          "due_date": { "type": "string", "format": "date-time" },
+          "status": { "type": "string" }
+        }
+      },
+      "DashboardStats": {
+        "type": "object",
+        "properties": {
+          "totalBooks": { "type": "integer" },
+          "totalMembers": { "type": "integer" },
+          "borrowedBooks": { "type": "integer" },
+          "overdueBooks": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
