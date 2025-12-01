@@ -22,7 +22,9 @@
     { "name": "Members" },
     { "name": "Admins" },
     { "name": "Borrow" },
-    { "name": "Dashboard" }
+    { "name": "Dashboard" },
+    { "name": "Categories" },
+    { "name": "Returns" }
   ],
   "paths": {
     "/api/auth/login": {
@@ -227,6 +229,94 @@
         }
       }
     },
+    "/api/categories": {
+      "get": {
+        "tags": ["Categories"],
+        "summary": "รายการหมวดหมู่ทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Category" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Categories"],
+        "summary": "เพิ่มหมวดหมู่",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "เพิ่มหมวดหมู่สำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Category" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["Categories"],
+        "summary": "แก้ไขชื่อหมวดหมู่",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CategoryInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตหมวดหมู่สำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Category" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Categories"],
+        "summary": "ลบหมวดหมู่",
+        "responses": {
+          "200": {
+            "description": "ลบหมวดหมู่สำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          },
+          "404": { "description": "ไม่พบหมวดหมู่" }
+        }
+      }
+    },
     "/api/admin": {
       "get": {
         "tags": ["Admins"],
@@ -416,6 +506,94 @@
           }
         }
       }
+    },
+    "/api/returns": {
+      "get": {
+        "tags": ["Returns"],
+        "summary": "รายการคืนหนังสือทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ReturnRecord" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Returns"],
+        "summary": "สร้างรายการคืนหนังสือ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReturnInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "สร้างรายการคืนสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReturnRecord" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/returns/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["Returns"],
+        "summary": "อัปเดตรายการคืนหนังสือ",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReturnInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตรายการคืนสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReturnRecord" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Returns"],
+        "summary": "ลบรายการคืนหนังสือ",
+        "responses": {
+          "200": {
+            "description": "ลบรายการคืนสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          },
+          "404": { "description": "ไม่พบรายการคืน" }
+        }
+      }
     }
   },
   "components": {
@@ -482,7 +660,8 @@
           "shelf": { "type": "string" },
           "amount": { "type": "integer" },
           "status": { "type": "string", "description": "available | borrowed" },
-          "category_id": { "type": "integer" }
+          "category_id": { "type": "integer" },
+          "category_name": { "type": "string" }
         }
       },
       "BookInput": {
@@ -498,6 +677,20 @@
           "amount": { "type": "integer" },
           "status": { "type": "string", "description": "available | borrowed" },
           "category_id": { "type": "integer" }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "category_id": { "type": "integer" },
+          "category_name": { "type": "string" }
+        }
+      },
+      "CategoryInput": {
+        "type": "object",
+        "required": ["category_name"],
+        "properties": {
+          "category_name": { "type": "string" }
         }
       },
       "Member": {
@@ -591,6 +784,24 @@
           "totalMembers": { "type": "integer" },
           "borrowedBooks": { "type": "integer" },
           "overdueBooks": { "type": "integer" }
+        }
+      },
+      "ReturnRecord": {
+        "type": "object",
+        "properties": {
+          "return_id": { "type": "integer" },
+          "return_date": { "type": "string", "format": "date-time" },
+          "totalfine": { "type": "number", "format": "float" },
+          "processed_id": { "type": "integer" }
+        }
+      },
+      "ReturnInput": {
+        "type": "object",
+        "required": ["return_date", "totalfine", "processed_id"],
+        "properties": {
+          "return_date": { "type": "string", "format": "date-time" },
+          "totalfine": { "type": "number", "format": "float" },
+          "processed_id": { "type": "integer" }
         }
       }
     }

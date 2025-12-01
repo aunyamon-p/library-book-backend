@@ -4,7 +4,11 @@ import { handleError } from '../utils/error.js';
 // GET all books
 export const getBooks = async (req, res) => {
   try {
-    const result = await pool.request().query('SELECT * FROM Book');
+    const result = await pool.request().query(`
+      SELECT b.*, c.category_name
+      FROM Book b
+      LEFT JOIN Category c ON b.category_id = c.category_id
+    `);
     res.json(result.recordset);
   } catch (err) {
     handleError(res, err);

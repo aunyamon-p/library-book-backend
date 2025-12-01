@@ -5,6 +5,8 @@ import memberRoutes from './memberRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import borrowRoutes from './borrowRoutes.js';
 import dashboardRoutes from './dashboardRoutes.js';
+import categoryRoutes from './categoryRoutes.js';
+import returnRoutes from './returnRoutes.js';
 
 const router = express.Router();
 
@@ -14,5 +16,7 @@ router.use('/members', memberRoutes);
 router.use('/admin', adminRoutes);
 router.use('/borrow', borrowRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/categories', categoryRoutes);
+router.use('/returns', returnRoutes);
 
 export default router;
