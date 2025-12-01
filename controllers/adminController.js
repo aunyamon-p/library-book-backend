@@ -67,7 +67,6 @@ export const deleteAdmin = async (req, res) => {
 
     res.json({ message: 'Admin deleted' });
   } catch (err) {
-    // Handle FK constraint (e.g., admin referenced by other records)
     if (err.number === 547) {
       return res.status(400).json({
         error: 'Cannot delete admin because it is referenced by other data',

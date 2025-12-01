@@ -5,7 +5,7 @@ import { handleError } from '../utils/error.js';
 export const getBorrowRecords = async (req, res) => {
   try {
     const result = await pool.request().query(`
-      SELECT br.borrow_id, m.name AS member_name, b.book_name, br.borrow_date, db.due_date, db.status
+      SELECT db.detail_borrow_id, m.name AS member_name, b.book_name, br.borrow_date, db.due_date, db.status
       FROM BorrowRecord br
       JOIN Member m ON br.user_id = m.user_id
       JOIN DetailBorrow db ON br.borrow_id = db.borrow_id

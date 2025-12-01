@@ -7,7 +7,7 @@ import { handleError } from '../utils/error.js';
 // GET /returns
 export const getReturns = async (req, res) => {
   try {
-    const result = await pool.request().query('SELECT * FROM [Return] ORDER BY return_id');
+    const result = await pool.request().query('SELECT * FROM Returned ORDER BY return_id');
     res.json(result.recordset);
   } catch (err) {
     handleError(res, err);
