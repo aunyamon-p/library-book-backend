@@ -24,7 +24,8 @@
     { "name": "Borrow" },
     { "name": "Dashboard" },
     { "name": "Categories" },
-    { "name": "Returns" }
+    { "name": "Returns" },
+    { "name": "ReturnDetails" }
   ],
   "paths": {
     "/api/auth/login": {
@@ -594,6 +595,94 @@
           "404": { "description": "ไม่พบรายการคืน" }
         }
       }
+    },
+    "/api/return-details": {
+      "get": {
+        "tags": ["ReturnDetails"],
+        "summary": "รายละเอียดการคืนทั้งหมด",
+        "responses": {
+          "200": {
+            "description": "ดึงข้อมูลสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/ReturnDetail" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["ReturnDetails"],
+        "summary": "เพิ่มรายละเอียดการคืน",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReturnDetailInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "เพิ่มรายละเอียดการคืนสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReturnDetail" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/return-details/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "put": {
+        "tags": ["ReturnDetails"],
+        "summary": "แก้ไขรายละเอียดการคืน",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReturnDetailInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "อัปเดตรายละเอียดการคืนสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ReturnDetail" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["ReturnDetails"],
+        "summary": "ลบรายละเอียดการคืน",
+        "responses": {
+          "200": {
+            "description": "ลบรายละเอียดการคืนสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          },
+          "404": { "description": "ไม่พบรายละเอียดการคืน" }
+        }
+      }
     }
   },
   "components": {
@@ -802,6 +891,26 @@
           "return_date": { "type": "string", "format": "date-time" },
           "totalfine": { "type": "number", "format": "float" },
           "processed_id": { "type": "integer" }
+        }
+      },
+      "ReturnDetail": {
+        "type": "object",
+        "properties": {
+          "detail_returned_id": { "type": "integer" },
+          "return_id": { "type": "integer" },
+          "book_id": { "type": "integer" },
+          "fine": { "type": "number", "format": "float" },
+          "status": { "type": "string" }
+        }
+      },
+      "ReturnDetailInput": {
+        "type": "object",
+        "required": ["return_id", "book_id", "fine", "status"],
+        "properties": {
+          "return_id": { "type": "integer" },
+          "book_id": { "type": "integer" },
+          "fine": { "type": "number", "format": "float" },
+          "status": { "type": "string" }
         }
       }
     }
