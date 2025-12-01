@@ -5,13 +5,50 @@ import { handleError } from '../utils/error.js';
 export const getBorrowRecords = async (req, res) => {
   try {
     const result = await pool.request().query(`
-      SELECT br.borrow_id, db.book_id, m.name AS member_name, b.book_name, br.borrow_date, db.due_date, db.status
+      SELECT
+        br.borrow_id,
+        br.user_id,
+        br.borrow_date,
+        br.amount,
+        br.recorded_by,
+        m.name AS member_name,
+        db.book_id,
+        db.due_date,
+        db.status,
+        b.book_name
       FROM BorrowRecord br
       JOIN Member m ON br.user_id = m.user_id
       JOIN DetailBorrow db ON br.borrow_id = db.borrow_id
       JOIN Book b ON db.book_id = b.book_id
+      ORDER BY br.borrow_id DESC, db.book_id
     `);
-    res.json(result.recordset);
+
+    const grouped = [];
+    const byBorrow = new Map();
+
+    for (const row of result.recordset) {
+      if (!byBorrow.has(row.borrow_id)) {
+        const item = {
+          borrow_id: row.borrow_id,
+          user_id: row.user_id,
+          member_name: row.member_name,
+          borrow_date: row.borrow_date,
+          amount: row.amount,
+          recorded_by: row.recorded_by,
+          books: []
+        };
+        byBorrow.set(row.borrow_id, item);
+        grouped.push(item);
+      }
+      byBorrow.get(row.borrow_id).books.push({
+        book_id: row.book_id,
+        book_name: row.book_name,
+        due_date: row.due_date,
+        status: row.status
+      });
+    }
+
+    res.json(grouped);
   } catch (err) {
     handleError(res, err);
   }

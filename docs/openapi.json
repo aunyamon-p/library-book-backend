@@ -814,11 +814,15 @@
         "type": "object",
         "properties": {
           "borrow_id": { "type": "integer" },
+          "user_id": { "type": "integer" },
           "member_name": { "type": "string" },
-          "book_name": { "type": "string" },
           "borrow_date": { "type": "string", "format": "date-time" },
-          "due_date": { "type": "string", "format": "date-time" },
-          "status": { "type": "string" }
+          "amount": { "type": "integer" },
+          "recorded_by": { "type": "integer" },
+          "books": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DetailBorrow" }
+          }
         }
       },
       "BorrowCreateRequest": {
@@ -860,9 +864,9 @@
       "DetailBorrow": {
         "type": "object",
         "properties": {
-          "detail_borrow_id": { "type": "integer" },
           "borrow_id": { "type": "integer" },
           "book_id": { "type": "integer" },
+          "book_name": { "type": "string" },
           "due_date": { "type": "string", "format": "date-time" },
           "status": { "type": "string" }
         }
