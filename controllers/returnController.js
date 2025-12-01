@@ -1,13 +1,13 @@
 import pool from '../db/sqlServer.js';
 import { handleError } from '../utils/error.js';
 
-// NOTE: ใช้ชื่อตาราง ReturnRecord เพื่อไม่ชนคำสงวน RETURN ของ SQL Server
-// ถ้าฐานข้อมูลใช้ชื่อตารางอื่น เปลี่ยนชื่อใน query ให้ตรง (เช่น [Return])
+// NOTE: ใช้ชื่อตาราง [Return] (ครอบด้วย [] เพราะเป็นคำสงวน)
+// ถ้าตารางชื่ออื่น เช่น ReturnRecord ให้เปลี่ยนชื่อใน query ให้ตรง
 
 // GET /returns
 export const getReturns = async (req, res) => {
   try {
-    const result = await pool.request().query('SELECT * FROM ReturnRecord ORDER BY return_id');
+    const result = await pool.request().query('SELECT * FROM [Return] ORDER BY return_id');
     res.json(result.recordset);
   } catch (err) {
     handleError(res, err);
@@ -22,9 +22,9 @@ export const addReturn = async (req, res) => {
       .input('return_date', return_date)
       .input('totalfine', totalfine)
       .input('processed_id', processed_id)
-      .query(`INSERT INTO ReturnRecord (return_date, totalfine, processed_id)
+      .query(`INSERT INTO [Return] (return_date, totalfine, processed_id)
               VALUES (@return_date, @totalfine, @processed_id);
-              SELECT * FROM ReturnRecord WHERE return_id = SCOPE_IDENTITY()`);
+              SELECT * FROM [Return] WHERE return_id = SCOPE_IDENTITY()`);
     res.json(result.recordset[0]);
   } catch (err) {
     handleError(res, err, { defaultMessage: 'Failed to add return record' });
@@ -41,9 +41,9 @@ export const updateReturn = async (req, res) => {
       .input('return_date', return_date)
       .input('totalfine', totalfine)
       .input('processed_id', processed_id)
-      .query(`UPDATE ReturnRecord SET return_date=@return_date, totalfine=@totalfine, processed_id=@processed_id
+      .query(`UPDATE [Return] SET return_date=@return_date, totalfine=@totalfine, processed_id=@processed_id
               WHERE return_id=@id;
-              SELECT * FROM ReturnRecord WHERE return_id=@id`);
+              SELECT * FROM [Return] WHERE return_id=@id`);
     res.json(result.recordset[0]);
   } catch (err) {
     handleError(res, err, { defaultMessage: 'Failed to update return record' });
@@ -56,7 +56,7 @@ export const deleteReturn = async (req, res) => {
   try {
     const result = await pool.request()
       .input('id', id)
-      .query('DELETE FROM ReturnRecord WHERE return_id=@id');
+      .query('DELETE FROM [Return] WHERE return_id=@id');
 
     const affected = result.rowsAffected?.[0] || 0;
     if (affected === 0) {
