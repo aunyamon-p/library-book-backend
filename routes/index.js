@@ -8,7 +8,7 @@ import dashboardRoutes from './dashboardRoutes.js';
 
 const router = express.Router();
 
-router.use('/login', authRoutes);
+router.use('/auth', authRoutes);
 router.use('/books', bookRoutes);
 router.use('/members', memberRoutes);
 router.use('/admin', adminRoutes);
