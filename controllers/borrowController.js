@@ -15,6 +15,7 @@ export const getBorrowRecords = async (req, res) => {
         db.book_id,
         db.due_date,
         db.status,
+        db.renew_count,
         b.book_name
       FROM BorrowRecord br
       JOIN Member m ON br.user_id = m.user_id
@@ -44,7 +45,8 @@ export const getBorrowRecords = async (req, res) => {
         book_id: row.book_id,
         book_name: row.book_name,
         due_date: row.due_date,
-        status: row.status
+        status: row.status,
+        renew_count: row.renew_count
       });
     }
 

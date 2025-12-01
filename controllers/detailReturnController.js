@@ -5,9 +5,27 @@ import { handleError } from '../utils/error.js';
 export const getReturnDetails = async (req, res) => {
   try {
     const result = await pool.request().query(`
-      SELECT *
-      FROM DetailReturned
-      ORDER BY return_id DESC, book_id
+      SELECT
+        dr.detail_returned_id,
+        dr.return_id,
+        dr.borrow_id,
+        dr.book_id,
+        dr.return_date,
+        dr.fine,
+        dr.status,
+        r.return_date AS return_header_date,
+        r.totalfine,
+        r.processed_by,
+        pa.name AS processed_by_name,
+        b.book_name,
+        m.name AS member_name
+      FROM DetailReturned dr
+      LEFT JOIN Returned r ON dr.return_id = r.return_id
+      LEFT JOIN Admin pa ON r.processed_by = pa.admin_id
+      LEFT JOIN BorrowRecord br ON dr.borrow_id = br.borrow_id
+      LEFT JOIN Member m ON br.user_id = m.user_id
+      LEFT JOIN Book b ON dr.book_id = b.book_id
+      ORDER BY dr.return_id DESC, dr.book_id
     `);
 
     res.json(result.recordset);
