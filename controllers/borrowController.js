@@ -5,7 +5,7 @@ import { handleError } from '../utils/error.js';
 export const getBorrowRecords = async (req, res) => {
   try {
     const result = await pool.request().query(`
-      SELECT db.detail_borrow_id, m.name AS member_name, b.book_name, br.borrow_date, db.due_date, db.status
+      SELECT br.borrow_id, db.book_id, m.name AS member_name, b.book_name, br.borrow_date, db.due_date, db.status
       FROM BorrowRecord br
       JOIN Member m ON br.user_id = m.user_id
       JOIN DetailBorrow db ON br.borrow_id = db.borrow_id
@@ -53,16 +53,18 @@ export const addBorrowRecord = async (req, res) => {
 
 // PUT /borrow/:id (update status)
 export const updateBorrowStatus = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body; // borrowed / returned
+  const { id } = req.params; // borrow_id
+  const { book_id, status } = req.body; // borrowed / returned
   try {
     const detailResult = await pool.request()
-      .input('id', id)
-      .query(`UPDATE DetailBorrow SET status=@status WHERE detail_borrow_id=@id;
-              SELECT * FROM DetailBorrow WHERE detail_borrow_id=@id`);
+      .input('borrow_id', id)
+      .input('book_id', book_id)
+      .input('status', status)
+      .query(`UPDATE DetailBorrow SET status=@status WHERE borrow_id=@borrow_id AND book_id=@book_id;
+              SELECT * FROM DetailBorrow WHERE borrow_id=@borrow_id AND book_id=@book_id`);
     const detail = detailResult.recordset[0];
 
-    if (status === 'returned') {
+    if (detail && status === 'returned') {
       // update book status to available
       await pool.request()
         .input('book_id', detail.book_id)

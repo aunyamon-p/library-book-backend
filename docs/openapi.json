@@ -851,8 +851,9 @@
       },
       "BorrowStatusUpdateRequest": {
         "type": "object",
-        "required": ["status"],
+        "required": ["book_id", "status"],
         "properties": {
+          "book_id": { "type": "integer", "description": "book_id ในรายการยืม (PK ร่วมกับ borrow_id)" },
           "status": { "type": "string", "description": "borrowed | returned" }
         }
       },
