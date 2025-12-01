@@ -47,6 +47,13 @@ export const addReturn = async (req, res) => {
           .input('status', item.status)
           .query(`INSERT INTO DetailReturned (return_id, borrow_id, book_id, return_date, fine, status)
                   VALUES (@return_id, @borrow_id, @book_id, @return_date, @fine, @status)`);
+
+        // อัปเดตสถานะรายการยืมและหนังสือให้เป็นคืนแล้ว
+        await new sql.Request(transaction)
+          .input('borrow_id', item.borrow_id)
+          .input('book_id', item.book_id)
+          .query(`UPDATE DetailBorrow SET status='returned' WHERE borrow_id=@borrow_id AND book_id=@book_id;
+                  UPDATE Book SET status='available' WHERE book_id=@book_id;`);
       }
     }
 

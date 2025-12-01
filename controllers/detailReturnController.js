@@ -94,6 +94,13 @@ export const updateReturnDetail = async (req, res) => {
 
     res.json(result.recordset[0]);
 
+    // อัปเดตสถานะในรายการยืมและหนังสือให้เป็นคืนแล้ว
+    await pool.request()
+      .input('borrow_id', borrow_id)
+      .input('book_id', book_id)
+      .query(`UPDATE DetailBorrow SET status='returned' WHERE borrow_id=@borrow_id AND book_id=@book_id;
+              UPDATE Book SET status='available' WHERE book_id=@book_id;`);
+
   } catch (err) {
     handleError(res, err, { defaultMessage: 'Failed to update' });
   }
