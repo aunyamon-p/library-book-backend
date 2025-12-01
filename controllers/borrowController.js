@@ -1,4 +1,5 @@
 import pool from '../db/sqlServer.js';
+import { handleError } from '../utils/error.js';
 
 // GET /borrow
 export const getBorrowRecords = async (req, res) => {
@@ -12,8 +13,7 @@ export const getBorrowRecords = async (req, res) => {
     `);
     res.json(result.recordset);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err);
   }
 };
 
@@ -47,8 +47,7 @@ export const addBorrowRecord = async (req, res) => {
 
     res.json({ message: 'Borrow record created', borrow_id });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to create borrow record' });
   }
 };
 
@@ -72,8 +71,7 @@ export const updateBorrowStatus = async (req, res) => {
 
     res.json(detail);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to update borrow status' });
   }
 };
 
@@ -85,7 +83,6 @@ export const deleteBorrowRecord = async (req, res) => {
     await pool.request().input('id', id).query('DELETE FROM DetailBorrow WHERE borrow_id=@id; DELETE FROM BorrowRecord WHERE borrow_id=@id;');
     res.json({ message: 'Borrow record deleted' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to delete borrow record' });
   }
 };

@@ -1,4 +1,5 @@
 import pool from '../db/sqlServer.js';
+import { handleError } from '../utils/error.js';
 
 // GET all books
 export const getBooks = async (req, res) => {
@@ -6,8 +7,7 @@ export const getBooks = async (req, res) => {
     const result = await pool.request().query('SELECT * FROM Book');
     res.json(result.recordset);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    handleError(res, err);
   }
 };
 
@@ -29,8 +29,7 @@ export const addBook = async (req, res) => {
               VALUES (@isbn,@book_name,@author,@publisher,@publish_year,@shelf,@amount,@status,@category_id)`);
     res.json({ message: 'Book added' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to add book' });
   }
 };
 
@@ -55,8 +54,7 @@ export const updateBook = async (req, res) => {
               amount=@amount, status=@status, category_id=@category_id WHERE book_id=@id`);
     res.json({ message: 'Book updated' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to update book' });
   }
 };
 
@@ -69,7 +67,6 @@ export const deleteBook = async (req, res) => {
       .query('DELETE FROM Book WHERE book_id=@id');
     res.json({ message: 'Book deleted' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to delete book' });
   }
 };

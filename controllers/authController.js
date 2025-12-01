@@ -1,6 +1,7 @@
 import pool from '../db/sqlServer.js';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { handleError } from '../utils/error.js';
 dotenv.config();
 
 export const login = async (req, res) => {
@@ -26,7 +27,6 @@ export const login = async (req, res) => {
     const token = jwt.sign({ admin_id: user.admin_id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '8h' });
     res.json({ token, user });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to login' });
   }
 };

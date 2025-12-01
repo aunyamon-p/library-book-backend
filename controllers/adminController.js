@@ -1,4 +1,5 @@
 import pool from '../db/sqlServer.js';
+import { handleError } from '../utils/error.js';
 
 // GET /admin
 export const getAdmins = async (req, res) => {
@@ -6,8 +7,7 @@ export const getAdmins = async (req, res) => {
     const result = await pool.request().query('SELECT * FROM Admin');
     res.json(result.recordset);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err);
   }
 };
 
@@ -26,8 +26,7 @@ export const addAdmin = async (req, res) => {
               SELECT * FROM Admin WHERE admin_id = SCOPE_IDENTITY()`);
     res.json(result.recordset[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to add admin' });
   }
 };
 
@@ -49,8 +48,7 @@ export const updateAdmin = async (req, res) => {
               SELECT * FROM Admin WHERE admin_id=@id`);
     res.json(result.recordset[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to update admin' });
   }
 };
 
@@ -58,10 +56,25 @@ export const updateAdmin = async (req, res) => {
 export const deleteAdmin = async (req, res) => {
   const { id } = req.params;
   try {
-    await pool.request().input('id', id).query('DELETE FROM Admin WHERE admin_id=@id');
+    const result = await pool.request()
+      .input('id', id)
+      .query('DELETE FROM Admin WHERE admin_id=@id');
+
+    const affected = result.rowsAffected?.[0] || 0;
+    if (affected === 0) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
     res.json({ message: 'Admin deleted' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    // Handle FK constraint (e.g., admin referenced by other records)
+    if (err.number === 547) {
+      return res.status(400).json({
+        error: 'Cannot delete admin because it is referenced by other data',
+        detail: err.message,
+        code: err.number
+      });
+    }
+    handleError(res, err, { defaultMessage: 'Failed to delete admin' });
   }
 };

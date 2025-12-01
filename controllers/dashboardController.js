@@ -1,4 +1,5 @@
 import pool from '../db/sqlServer.js';
+import { handleError } from '../utils/error.js';
 
 // GET /dashboard
 export const getDashboardStats = async (req, res) => {
@@ -19,7 +20,6 @@ export const getDashboardStats = async (req, res) => {
       overdueBooks: overdueBooks.recordset[0].total
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err);
   }
 };

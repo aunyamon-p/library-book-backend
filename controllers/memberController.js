@@ -1,4 +1,5 @@
 import pool from '../db/sqlServer.js';
+import { handleError } from '../utils/error.js';
 
 // GET /members
 export const getMembers = async (req, res) => {
@@ -6,8 +7,7 @@ export const getMembers = async (req, res) => {
     const result = await pool.request().query('SELECT * FROM Member');
     res.json(result.recordset);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err);
   }
 };
 
@@ -29,8 +29,7 @@ export const addMember = async (req, res) => {
               SELECT * FROM Member WHERE user_id = SCOPE_IDENTITY()`);
     res.json(result.recordset[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to add member' });
   }
 };
 
@@ -55,8 +54,7 @@ export const updateMember = async (req, res) => {
               SELECT * FROM Member WHERE user_id=@id`);
     res.json(result.recordset[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to update member' });
   }
 };
 
@@ -67,7 +65,6 @@ export const deleteMember = async (req, res) => {
     await pool.request().input('id', id).query('DELETE FROM Member WHERE user_id=@id');
     res.json({ message: 'Member deleted' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    handleError(res, err, { defaultMessage: 'Failed to delete member' });
   }
 };
