@@ -4,7 +4,20 @@ import { handleError } from '../utils/error.js';
 // GET /members
 export const getMembers = async (req, res) => {
   try {
-    const result = await pool.request().query('SELECT * FROM Member');
+    const result = await pool.request().query(`
+      SELECT
+        m.*,
+        ISNULL(active.borrowed_count, 0) AS borrowed_count,
+        m.borrowlimit - ISNULL(active.borrowed_count, 0) AS borrow_remaining
+      FROM Member m
+      LEFT JOIN (
+        SELECT br.user_id, COUNT(*) AS borrowed_count
+        FROM BorrowRecord br
+        JOIN DetailBorrow db ON br.borrow_id = db.borrow_id
+        WHERE db.status = 'borrowed'
+        GROUP BY br.user_id
+      ) AS active ON m.user_id = active.user_id
+    `);
     res.json(result.recordset);
   } catch (err) {
     handleError(res, err);

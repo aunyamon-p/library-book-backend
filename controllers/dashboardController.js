@@ -1,7 +1,6 @@
 import pool from '../db/sqlServer.js';
 import { handleError } from '../utils/error.js';
 
-// GET /dashboard
 export const getDashboardStats = async (req, res) => {
   try {
     const totalBooks = await pool.request().query('SELECT COUNT(*) AS total FROM Book');

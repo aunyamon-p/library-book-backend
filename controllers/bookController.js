@@ -8,6 +8,7 @@ export const getBooks = async (req, res) => {
       SELECT b.*, c.category_name
       FROM Book b
       LEFT JOIN Category c ON b.category_id = c.category_id
+      ORDER BY b.book_id DESC
     `);
     res.json(result.recordset);
   } catch (err) {
@@ -15,7 +16,6 @@ export const getBooks = async (req, res) => {
   }
 };
 
-// POST add book
 export const addBook = async (req, res) => {
   const { isbn, book_name, author, publisher, publish_year, shelf, amount, status, category_id } = req.body;
   try {
@@ -37,7 +37,6 @@ export const addBook = async (req, res) => {
   }
 };
 
-// PUT update book
 export const updateBook = async (req, res) => {
   const { id } = req.params;
   const { isbn, book_name, author, publisher, publish_year, shelf, amount, status, category_id } = req.body;
@@ -62,7 +61,6 @@ export const updateBook = async (req, res) => {
   }
 };
 
-// DELETE book
 export const deleteBook = async (req, res) => {
   const { id } = req.params;
   try {

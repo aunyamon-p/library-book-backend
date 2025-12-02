@@ -2,9 +2,6 @@ import pool from '../db/sqlServer.js';
 import sql from 'mssql';
 import { handleError } from '../utils/error.js';
 
-// ใช้ชื่อตาราง Returned และ DetailReturned ตาม schema ที่ให้มา
-
-// GET /returns
 export const getReturns = async (req, res) => {
   try {
     const result = await pool.request().query('SELECT * FROM Returned ORDER BY return_id');
@@ -14,24 +11,21 @@ export const getReturns = async (req, res) => {
   }
 };
 
-// POST /returns
 export const addReturn = async (req, res) => {
-  const { return_date, processed_by, items } = req.body; // items: [{borrow_id, book_id, return_date, fine, status}]
+  const { return_date, processed_by, items } = req.body;
   try {
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    // ถ้ามี items ให้คำนวณ totalfine จากรายการ
     const computedFine = Array.isArray(items)
       ? items.reduce((sum, it) => sum + Number(it.fine || 0), 0)
       : 0;
 
     const insertReturn = await new sql.Request(transaction)
-      .input('return_date', return_date)
       .input('totalfine', computedFine)
       .input('processed_by', processed_by)
-      .query(`INSERT INTO Returned (return_date, totalfine, processed_by)
-              VALUES (@return_date, @totalfine, @processed_by);
+      .query(`INSERT INTO Returned (totalfine, processed_by)
+              VALUES (@totalfine, @processed_by);
               SELECT SCOPE_IDENTITY() AS return_id;`);
 
     const return_id = insertReturn.recordset[0].return_id;
@@ -48,7 +42,6 @@ export const addReturn = async (req, res) => {
           .query(`INSERT INTO DetailReturned (return_id, borrow_id, book_id, return_date, fine, status)
                   VALUES (@return_id, @borrow_id, @book_id, @return_date, @fine, @status)`);
 
-        // อัปเดตสถานะรายการยืมและหนังสือให้เป็นคืนแล้ว
         await new sql.Request(transaction)
           .input('borrow_id', item.borrow_id)
           .input('book_id', item.book_id)
@@ -75,17 +68,15 @@ export const addReturn = async (req, res) => {
   }
 };
 
-// PUT /returns/:id
 export const updateReturn = async (req, res) => {
   const { id } = req.params;
-  const { return_date, totalfine, processed_by } = req.body;
+  const { totalfine, processed_by } = req.body;
   try {
     const result = await pool.request()
       .input('id', id)
-      .input('return_date', return_date)
       .input('totalfine', totalfine)
       .input('processed_by', processed_by)
-      .query(`UPDATE Returned SET return_date=@return_date, totalfine=@totalfine, processed_by=@processed_by
+      .query(`UPDATE Returned SET totalfine=@totalfine, processed_by=@processed_by
               WHERE return_id=@id;
               SELECT * FROM Returned WHERE return_id=@id`);
     res.json(result.recordset[0]);
@@ -94,10 +85,13 @@ export const updateReturn = async (req, res) => {
   }
 };
 
-// DELETE /returns/:id
 export const deleteReturn = async (req, res) => {
   const { id } = req.params;
-  try {
+  try { 
+    await pool.request()
+      .input('id', id)
+      .query('DELETE FROM DetailReturned WHERE return_id=@id');
+
     const result = await pool.request()
       .input('id', id)
       .query('DELETE FROM Returned WHERE return_id=@id');

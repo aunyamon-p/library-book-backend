@@ -1,7 +1,6 @@
 import pool from '../db/sqlServer.js';
 import { handleError } from '../utils/error.js';
 
-// GET /borrow
 export const getBorrowRecords = async (req, res) => {
   try {
     const result = await pool.request().query(`
@@ -23,10 +22,8 @@ export const getBorrowRecords = async (req, res) => {
       JOIN Book b ON db.book_id = b.book_id
       ORDER BY br.borrow_id DESC, db.book_id
     `);
-
     const grouped = [];
     const byBorrow = new Map();
-
     for (const row of result.recordset) {
       if (!byBorrow.has(row.borrow_id)) {
         const item = {
@@ -56,9 +53,8 @@ export const getBorrowRecords = async (req, res) => {
   }
 };
 
-// POST /borrow
 export const addBorrowRecord = async (req, res) => {
-  const { user_id, borrow_date, amount, recorded_by, books } = req.body; // books = [{book_id, due_date}]
+  const { user_id, borrow_date, amount, recorded_by, books } = req.body;
   try {
     const result = await pool.request()
       .input('user_id', user_id)
@@ -78,7 +74,6 @@ export const addBorrowRecord = async (req, res) => {
         .input('status', 'borrowed')
         .query(`INSERT INTO DetailBorrow (borrow_id, book_id, due_date, status)
                 VALUES (@borrow_id,@book_id,@due_date,@status)`);
-      // Update book status
       await pool.request()
         .input('book_id', book.book_id)
         .query(`UPDATE Book SET status='borrowed' WHERE book_id=@book_id`);
@@ -90,10 +85,9 @@ export const addBorrowRecord = async (req, res) => {
   }
 };
 
-// PUT /borrow/:id (update status)
 export const updateBorrowStatus = async (req, res) => {
-  const { id } = req.params; // borrow_id
-  const { book_id, status } = req.body; // borrowed / returned
+  const { id } = req.params;
+  const { book_id, status } = req.body;
   try {
     const detailResult = await pool.request()
       .input('borrow_id', id)
@@ -104,7 +98,6 @@ export const updateBorrowStatus = async (req, res) => {
     const detail = detailResult.recordset[0];
 
     if (detail && status === 'returned') {
-      // update book status to available
       await pool.request()
         .input('book_id', detail.book_id)
         .query(`UPDATE Book SET status='available' WHERE book_id=@book_id`);
@@ -116,13 +109,20 @@ export const updateBorrowStatus = async (req, res) => {
   }
 };
 
-// DELETE /borrow/:id
+
 export const deleteBorrowRecord = async (req, res) => {
   const { id } = req.params;
   try {
-    // optionally update book status back to available if needed
-    await pool.request().input('id', id).query('DELETE FROM DetailBorrow WHERE borrow_id=@id; DELETE FROM BorrowRecord WHERE borrow_id=@id;');
-    res.json({ message: 'Borrow record deleted' });
+    await pool.request()
+      .input('borrow_id', id)
+      .query('DELETE FROM DetailReturned WHERE borrow_id=@borrow_id');
+    await pool.request()
+      .input('borrow_id', id)
+      .query('DELETE FROM DetailBorrow WHERE borrow_id=@borrow_id');
+    await pool.request()
+      .input('borrow_id', id)
+      .query('DELETE FROM BorrowRecord WHERE borrow_id=@borrow_id');
+    res.json({ message: 'Borrow record deleted successfully' });
   } catch (err) {
     handleError(res, err, { defaultMessage: 'Failed to delete borrow record' });
   }

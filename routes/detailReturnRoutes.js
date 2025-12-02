@@ -12,6 +12,7 @@ const router = express.Router();
 router.get('/', authenticateJWT, getReturnDetails);
 router.post('/', authenticateJWT, addReturnDetail);
 router.put('/:id', authenticateJWT, updateReturnDetail);
+router.delete('/', authenticateJWT, deleteReturnDetail);
 router.delete('/:id', authenticateJWT, deleteReturnDetail);
 
 export default router;

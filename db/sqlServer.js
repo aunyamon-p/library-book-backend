@@ -11,7 +11,8 @@ const pool = new sql.ConnectionPool({
   options: {
     encrypt: true,
     trustServerCertificate: true
-  }
+  },
+  requestTimeout: 30000
 });
 
 export const connectDB = async () => {
